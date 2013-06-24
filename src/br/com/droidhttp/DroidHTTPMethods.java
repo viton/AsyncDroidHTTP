@@ -8,9 +8,13 @@ import org.json.JSONObject;
 public interface DroidHTTPMethods {
 	DroidHTTPResponse get(String path) throws MalformedURLException, IOException;
 
-//	void get(String path, Map<String, String> params);
+	// void get(String path, Map<String, String> params);
 
 	DroidHTTPResponse post(String path) throws MalformedURLException, IOException;
 
-	DroidHTTPResponse post(String path, JSONObject params) throws MalformedURLException, IOException ;
+	DroidHTTPResponse post(String path, JSONObject params) throws MalformedURLException, IOException;
+	
+	DroidHTTPResponse put(String path) throws MalformedURLException, IOException;
+	
+	DroidHTTPResponse put(String path, JSONObject params) throws MalformedURLException, IOException;
 }
