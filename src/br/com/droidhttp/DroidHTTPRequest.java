@@ -52,7 +52,8 @@ public class DroidHTTPRequest {
 	private DroidHTTPResponse via(HTTPMethod httpMethod, JSONObject params) throws IOException, UnsupportedEncodingException {
 		HttpURLConnection urlConnection = connectFor(httpMethod, params);
 		int responseCode = urlConnection.getResponseCode();
-		return new DroidHTTPResponse(responseCode, urlConnection.getInputStream());
+		DroidHTTPResponse droidHTTPResponse = new DroidHTTPResponse(responseCode, urlConnection.getInputStream());
+		return droidHTTPResponse;
 	}
 }
 

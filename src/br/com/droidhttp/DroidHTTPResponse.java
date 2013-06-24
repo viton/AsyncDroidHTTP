@@ -6,31 +6,40 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.util.Log;
-
+@SuppressWarnings("rawtypes")
 public class DroidHTTPResponse {
 	private int responseCode;
-	private JSONObject json;
+	private DroidHTTPJSON json;
 
 	public DroidHTTPResponse(int responseCode, InputStream is) throws UnsupportedEncodingException, IOException {
 		super();
 		this.responseCode = responseCode;
-		this.json = streamToJSON(is);
+		String jsonStr = streamToString(is);
+		try {
+			if (jsonStr.charAt(0) == '[') {
+				json = new DroidHTTPJSON<JSONArray>(jsonStr, JSONArray.class);
+			} else {
+				json = new DroidHTTPJSON<JSONObject>(jsonStr, JSONObject.class);
 
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public int getResponseCode() {
 		return responseCode;
 	}
 
-	public JSONObject getJson() {
-		return json;
+	public Object getJson() {
+		return json.getJSON();
 	}
 
-	private JSONObject streamToJSON(InputStream is) throws UnsupportedEncodingException, IOException {
+	private String streamToString(InputStream is) throws UnsupportedEncodingException, IOException {
 		StringBuilder sb = new StringBuilder();
 
 		BufferedReader br = new BufferedReader(new InputStreamReader(is, "utf-8"));
@@ -40,12 +49,7 @@ public class DroidHTTPResponse {
 		}
 		br.close();
 
-		try {
-			return new JSONObject(sb.toString());
-		} catch (JSONException e) {
-			Log.e("DroidHTTP", "Fail to parse JSON", e);
-		}
+		return sb.toString();
 
-		return null;
 	}
 }
