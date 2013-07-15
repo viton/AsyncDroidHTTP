@@ -17,4 +17,6 @@ public interface DroidHTTPMethods {
 	DroidHTTPResponse put(String path) throws MalformedURLException, IOException;
 	
 	DroidHTTPResponse put(String path, JSONObject params) throws MalformedURLException, IOException;
+	
+	DroidHTTPResponse delete(String path, JSONObject params) throws MalformedURLException, IOException;
 }

@@ -47,4 +47,13 @@ public class DroidHTTP implements DroidHTTPMethods {
 		DroidHTTPRequest droidHTTPRequest = new DroidHTTPRequest(mainURL.concat(path));
 		return droidHTTPRequest.put(params);
 	}
+
+	public DroidHTTPResponse delete(String path, JSONObject params) throws MalformedURLException, IOException {
+		if (params == null) {
+			throw new IllegalArgumentException("params can't be null");
+		}
+
+		DroidHTTPRequest droidHTTPRequest = new DroidHTTPRequest(mainURL.concat(path));
+		return droidHTTPRequest.delete(params);
+	}
 }

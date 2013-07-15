@@ -14,10 +14,14 @@ import org.json.JSONObject;
 public class DroidHTTPResponse {
 	private int responseCode;
 	private DroidHTTPJSON json;
-
-	public DroidHTTPResponse(int responseCode, InputStream is) throws UnsupportedEncodingException, IOException {
+	
+	public DroidHTTPResponse(int responseCode) {
 		super();
 		this.responseCode = responseCode;
+	}
+	
+	public DroidHTTPResponse(int responseCode, InputStream is) throws UnsupportedEncodingException, IOException {
+		this(responseCode);
 		String jsonStr = streamToString(is);
 		try {
 			if (jsonStr.charAt(0) == '[') {

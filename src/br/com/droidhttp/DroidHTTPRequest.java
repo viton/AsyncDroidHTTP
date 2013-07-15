@@ -20,6 +20,10 @@ public class DroidHTTPRequest {
 		return via(HTTPMethod.PUT, params);
 	}
 
+	public DroidHTTPResponse delete(JSONObject params) throws MalformedURLException, IOException {
+		return via(HTTPMethod.DELETE, params);
+	}
+
 	public DroidHTTPResponse post(JSONObject params) throws MalformedURLException, IOException {
 		return via(HTTPMethod.POST, params);
 	}
@@ -31,7 +35,6 @@ public class DroidHTTPRequest {
 	private HttpURLConnection connectFor(HTTPMethod httpMethod, JSONObject params) throws MalformedURLException, IOException {
 		URL url = new URL(mainURL);
 		HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-		urlConnection.setDoOutput(false);
 		urlConnection.setRequestMethod(httpMethod.getValue());
 		urlConnection.setUseCaches(false);
 		urlConnection.setConnectTimeout(10000);
@@ -39,9 +42,12 @@ public class DroidHTTPRequest {
 		urlConnection.setRequestProperty("Content-Type", "application/json");
 
 		if (params != null) {
+			urlConnection.setDoOutput(true);
 			OutputStreamWriter out = new OutputStreamWriter(urlConnection.getOutputStream());
 			out.write(params.toString());
 			out.close();
+		} else {
+			urlConnection.setDoOutput(false);
 		}
 
 		urlConnection.connect();
@@ -50,15 +56,24 @@ public class DroidHTTPRequest {
 	}
 
 	private DroidHTTPResponse via(HTTPMethod httpMethod, JSONObject params) throws IOException, UnsupportedEncodingException {
-		HttpURLConnection urlConnection = connectFor(httpMethod, params);
-		int responseCode = urlConnection.getResponseCode();
-		DroidHTTPResponse droidHTTPResponse = new DroidHTTPResponse(responseCode, urlConnection.getInputStream());
-		return droidHTTPResponse;
+		try {
+			HttpURLConnection urlConnection = connectFor(httpMethod, params);
+			int responseCode = urlConnection.getResponseCode();
+			if (responseCode != 422 && urlConnection.getContent() != null) {
+				return new DroidHTTPResponse(responseCode, urlConnection.getInputStream());
+			} else {
+				return new DroidHTTPResponse(responseCode);
+			}
+		} catch (IOException e) {
+			if (e.getMessage().contains("authentication challenge")) {
+				return new DroidHTTPResponse(HttpURLConnection.HTTP_UNAUTHORIZED);
+		    } else { throw e; }
+		}			
 	}
 }
 
 enum HTTPMethod {
-	GET("GET"), POST("POST"), PUT("PUT");
+	GET("GET"), POST("POST"), PUT("PUT"), DELETE("DELETE");
 
 	private String value;
 
