@@ -56,15 +56,21 @@ public class DroidHTTPRequest {
 	}
 
 	private DroidHTTPResponse via(HTTPMethod httpMethod, JSONObject params) throws IOException, UnsupportedEncodingException {
+		int responseCode = -1;
+		HttpURLConnection urlConnection = null;
 		try {
-			HttpURLConnection urlConnection = connectFor(httpMethod, params);
-			int responseCode = urlConnection.getResponseCode();
-			if (responseCode != 422 && urlConnection.getContent() != null) {
+			urlConnection = connectFor(httpMethod, params);
+			responseCode = urlConnection.getResponseCode();
+			if (urlConnection.getContent() != null) {
 				return new DroidHTTPResponse(responseCode, urlConnection.getInputStream());
 			} else {
 				return new DroidHTTPResponse(responseCode);
 			}
 		} catch (IOException e) {
+			if (responseCode == 422 && urlConnection != null) {
+				return new DroidHTTPResponse(responseCode, urlConnection.getErrorStream());
+			}
+			
 			if (e.getMessage().contains("authentication challenge")) {
 				return new DroidHTTPResponse(HttpURLConnection.HTTP_UNAUTHORIZED);
 		    } else { throw e; }
