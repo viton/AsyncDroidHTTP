@@ -1,5 +1,6 @@
 package br.com.droidhttp;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
@@ -66,10 +67,12 @@ public class DroidHTTPRequest {
 			} else {
 				return new DroidHTTPResponse(responseCode);
 			}
+		} catch (FileNotFoundException e) {
+			return new DroidHTTPResponse(responseCode);
 		} catch (IOException e) {
-			if (responseCode == 422 && urlConnection != null) {
+			if (urlConnection != null && urlConnection.getErrorStream() != null) {
 				return new DroidHTTPResponse(responseCode, urlConnection.getErrorStream());
-			}
+			} 
 			
 			if (e.getMessage().contains("authentication challenge")) {
 				return new DroidHTTPResponse(HttpURLConnection.HTTP_UNAUTHORIZED);
