@@ -74,7 +74,7 @@ public class DroidHTTPRequest {
 				return new DroidHTTPResponse(responseCode, urlConnection.getErrorStream());
 			} 
 			
-			if (e.getMessage().contains("authentication challenge")) {
+			if (e.getMessage() != null && e.getMessage().contains("authentication challenge")) {
 				return new DroidHTTPResponse(HttpURLConnection.HTTP_UNAUTHORIZED);
 		    } else { throw e; }
 		}			
