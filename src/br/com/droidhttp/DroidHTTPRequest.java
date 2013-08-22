@@ -67,17 +67,17 @@ public class DroidHTTPRequest {
 			} else {
 				return new DroidHTTPResponse(responseCode);
 			}
-		} catch (FileNotFoundException e) {
-			return new DroidHTTPResponse(responseCode);
 		} catch (IOException e) {
-			if (urlConnection != null && urlConnection.getErrorStream() != null) {
+			if (responseCode == 422 && urlConnection != null) {
 				return new DroidHTTPResponse(responseCode, urlConnection.getErrorStream());
-			} 
-			
-			if (e.getMessage() != null && e.getMessage().contains("authentication challenge")) {
+			}
+
+			if (e.getMessage().contains("authentication challenge")) {
 				return new DroidHTTPResponse(HttpURLConnection.HTTP_UNAUTHORIZED);
-		    } else { throw e; }
-		}			
+			} else {
+				throw e;
+			}
+		}
 	}
 }
 
