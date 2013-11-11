@@ -109,7 +109,7 @@ public class DroidHTTPRequest {
 		} catch (FileNotFoundException e) {
 			return new DroidHTTPResponse(responseCode, urlConnection.getErrorStream());
 		} catch (IOException e) {
-			if (urlConnection != null && urlConnection.getErrorStream() != null) {
+			if (responseCode == 422 && urlConnection != null) {
 				return new DroidHTTPResponse(responseCode, urlConnection.getErrorStream());
 			}
 
