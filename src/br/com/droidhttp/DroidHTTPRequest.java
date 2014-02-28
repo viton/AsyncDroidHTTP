@@ -1,6 +1,5 @@
 package br.com.droidhttp;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
@@ -12,35 +11,41 @@ import org.json.JSONObject;
 
 public class DroidHTTPRequest {
 	public String mainURL;
+	private DroidHTTPParams droidParams;
 
-	public DroidHTTPRequest(String mainURL) {
+	public DroidHTTPRequest(String mainURL, DroidHTTPParams droidParams) {
 		this.mainURL = mainURL;
+		this.droidParams = droidParams;
 	}
 
 	public DroidHTTPResponse put(JSONObject params) throws MalformedURLException, IOException {
-		return via(HTTPMethod.PUT, params);
+		return via(HTTPMethod.PUT, params, droidParams);
 	}
 
 	public DroidHTTPResponse delete(JSONObject params) throws MalformedURLException, IOException {
-		return via(HTTPMethod.DELETE, params);
+		return via(HTTPMethod.DELETE, params, droidParams);
+	}
+	
+	public DroidHTTPResponse delete() throws MalformedURLException, IOException {
+		return via(HTTPMethod.DELETE, null, droidParams);
 	}
 
 	public DroidHTTPResponse post(JSONObject params) throws MalformedURLException, IOException {
-		return via(HTTPMethod.POST, params);
+		return via(HTTPMethod.POST, params, droidParams);
 	}
 
 	public DroidHTTPResponse get() throws MalformedURLException, IOException {
-		return via(HTTPMethod.GET, null);
+		return via(HTTPMethod.GET, null, droidParams);
 	}
 
-	private HttpURLConnection connectFor(HTTPMethod httpMethod, JSONObject params) throws MalformedURLException, IOException {
+	private HttpURLConnection connectFor(HTTPMethod httpMethod, JSONObject params, DroidHTTPParams droidParams) throws MalformedURLException, IOException {
 		URL url = new URL(mainURL);
 		HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
 		urlConnection.setRequestMethod(httpMethod.getValue());
-		urlConnection.setUseCaches(false);
-		urlConnection.setConnectTimeout(10000);
-		urlConnection.setReadTimeout(10000);
-		urlConnection.setRequestProperty("Content-Type", "application/json");
+		urlConnection.setUseCaches(droidParams != null? droidParams.isUsesCache():false);
+		urlConnection.setConnectTimeout(droidParams != null? droidParams.getConnectTimeOut():10000);
+		urlConnection.setReadTimeout(droidParams != null? droidParams.getReadTimeOut():10000);
+		urlConnection.setRequestProperty("Content-Type", droidParams != null? droidParams.getContentType():"application/json");
 
 		if (params != null) {
 			urlConnection.setDoOutput(true);
@@ -56,11 +61,11 @@ public class DroidHTTPRequest {
 		return urlConnection;
 	}
 
-	private DroidHTTPResponse via(HTTPMethod httpMethod, JSONObject params) throws IOException, UnsupportedEncodingException {
+	private DroidHTTPResponse via(HTTPMethod httpMethod, JSONObject params, DroidHTTPParams droidParams) throws IOException, UnsupportedEncodingException {
 		int responseCode = -1;
 		HttpURLConnection urlConnection = null;
 		try {
-			urlConnection = connectFor(httpMethod, params);
+			urlConnection = connectFor(httpMethod, params, droidParams);
 			responseCode = urlConnection.getResponseCode();
 			if (urlConnection.getContent() != null) {
 				return new DroidHTTPResponse(responseCode, urlConnection.getInputStream());
@@ -68,13 +73,17 @@ public class DroidHTTPRequest {
 				return new DroidHTTPResponse(responseCode);
 			}
 		} catch (IOException e) {
-			if (responseCode == 422 && urlConnection != null) {
+			if ((responseCode == 422  || responseCode == 424)&& urlConnection != null) {
 				return new DroidHTTPResponse(responseCode, urlConnection.getErrorStream());
 			}
 
-			if (e.getMessage().contains("authentication challenge")) {
-				return new DroidHTTPResponse(HttpURLConnection.HTTP_UNAUTHORIZED);
-			} else {
+			try{
+				if (e.getMessage().contains("authentication challenge")) {
+					return new DroidHTTPResponse(HttpURLConnection.HTTP_UNAUTHORIZED);
+				} else {
+					throw e;
+				}
+			}catch(Exception e1){
 				throw e;
 			}
 		}
@@ -93,4 +102,5 @@ enum HTTPMethod {
 	public String getValue() {
 		return value;
 	}
+	
 }

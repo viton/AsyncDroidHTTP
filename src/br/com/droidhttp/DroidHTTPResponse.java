@@ -42,6 +42,10 @@ public class DroidHTTPResponse {
 	public Object getJson() {
 		return json.getJSON();
 	}
+	
+	public boolean hasJson() {
+		return json != null;
+	}
 
 	private String streamToString(InputStream is) throws UnsupportedEncodingException, IOException {
 		StringBuilder sb = new StringBuilder();

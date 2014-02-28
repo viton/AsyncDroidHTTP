@@ -7,14 +7,21 @@ import java.util.Map;
 import org.json.JSONObject;
 
 public class DroidHTTP implements DroidHTTPMethods {
+	
 	private String mainURL;
-
+	private DroidHTTPParams droidParams;
+	
 	public DroidHTTP(String mainURL) {
 		this.mainURL = mainURL;
 	}
+	
+	public DroidHTTP(String mainURL, DroidHTTPParams params) {
+		this.mainURL = mainURL;
+		this.droidParams = params;
+	}
 
 	public DroidHTTPResponse get(String path) throws MalformedURLException, IOException {
-		DroidHTTPRequest droidHTTPRequest = new DroidHTTPRequest(mainURL.concat(path));
+		DroidHTTPRequest droidHTTPRequest = new DroidHTTPRequest(mainURL.concat(path), droidParams);
 		return droidHTTPRequest.get();
 	}
 
@@ -31,12 +38,13 @@ public class DroidHTTP implements DroidHTTPMethods {
 			throw new IllegalArgumentException("params can't be null");
 		}
 
-		DroidHTTPRequest droidHTTPRequest = new DroidHTTPRequest(mainURL.concat(path));
+		DroidHTTPRequest droidHTTPRequest = new DroidHTTPRequest(mainURL.concat(path), droidParams);
 		return droidHTTPRequest.post(params);
 	}
 
 	public DroidHTTPResponse put(String path) throws MalformedURLException, IOException {
-		return null;
+		DroidHTTPRequest droidHTTPRequest = new DroidHTTPRequest(mainURL.concat(path), droidParams);
+		return droidHTTPRequest.put(null);
 	}
 
 	public DroidHTTPResponse put(String path, JSONObject params) throws MalformedURLException, IOException {
@@ -44,7 +52,7 @@ public class DroidHTTP implements DroidHTTPMethods {
 			throw new IllegalArgumentException("params can't be null");
 		}
 
-		DroidHTTPRequest droidHTTPRequest = new DroidHTTPRequest(mainURL.concat(path));
+		DroidHTTPRequest droidHTTPRequest = new DroidHTTPRequest(mainURL.concat(path), droidParams);
 		return droidHTTPRequest.put(params);
 	}
 
@@ -53,7 +61,14 @@ public class DroidHTTP implements DroidHTTPMethods {
 			throw new IllegalArgumentException("params can't be null");
 		}
 
-		DroidHTTPRequest droidHTTPRequest = new DroidHTTPRequest(mainURL.concat(path));
+		DroidHTTPRequest droidHTTPRequest = new DroidHTTPRequest(mainURL.concat(path), droidParams);
 		return droidHTTPRequest.delete(params);
+	}
+
+	@Override
+	public DroidHTTPResponse delete(String path) throws MalformedURLException,
+			IOException {
+		DroidHTTPRequest droidHTTPRequest = new DroidHTTPRequest(mainURL.concat(path), droidParams);
+		return droidHTTPRequest.delete();
 	}
 }
