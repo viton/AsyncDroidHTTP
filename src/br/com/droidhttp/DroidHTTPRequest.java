@@ -9,15 +9,18 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Locale;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.Build;
+import android.util.Log;
 
 public class DroidHTTPRequest {
 	public String mainURL;
@@ -49,7 +52,7 @@ public class DroidHTTPRequest {
 	}
 
 	private HttpURLConnection connectFor(HTTPMethod httpMethod, JSONObject params, DroidHTTPParams droidParams) throws MalformedURLException, IOException {
-		URL url = new URL(mainURL);
+		URL url = new URL(getPathWithLocale(mainURL));
 		if (android.os.Build.VERSION.SDK_INT == Build.VERSION_CODES.FROYO ) {
 			trustAllHosts();
 		}
@@ -62,6 +65,9 @@ public class DroidHTTPRequest {
 		urlConnection.setRequestProperty("Content-Type", droidParams != null? droidParams.getContentType():"application/json");
 
 		if (params != null) {
+			try {
+				params.putOpt("locale", Locale.getDefault().getLanguage());
+			} catch (JSONException e) {}
 			urlConnection.setDoOutput(true);
 			OutputStreamWriter out = new OutputStreamWriter(urlConnection.getOutputStream());
 			out.write(params.toString());
@@ -73,6 +79,15 @@ public class DroidHTTPRequest {
 		urlConnection.connect();
 
 		return urlConnection;
+	}
+	
+	private String getPathWithLocale(String path){
+		String locale = Locale.getDefault().getLanguage();
+		String append = path.contains("?")?"&":"?";
+		
+		StringBuilder sbr = new StringBuilder(path);
+		sbr.append(append).append("locale=").append(locale);
+		return sbr.toString();
 	}
 
 	/**
