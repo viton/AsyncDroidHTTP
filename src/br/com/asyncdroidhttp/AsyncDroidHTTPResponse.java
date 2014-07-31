@@ -1,4 +1,4 @@
-package br.com.droidhttp;
+package br.com.asyncdroidhttp;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,31 +7,33 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 @SuppressWarnings("rawtypes")
-public class DroidHTTPResponse {
+public class AsyncDroidHTTPResponse {
 	private int responseCode;
-	private DroidHTTPJSON json;
+	private AsyncDroidHTTPJSON json;
+	private Exception exception;
 	
-	public DroidHTTPResponse(int responseCode) {
+	public AsyncDroidHTTPResponse(int responseCode) {
 		super();
 		this.responseCode = responseCode;
 	}
 	
-	public DroidHTTPResponse(int responseCode, InputStream is) throws UnsupportedEncodingException, IOException {
+	public AsyncDroidHTTPResponse(int responseCode, InputStream is, Exception exception) {
 		this(responseCode);
-		String jsonStr = streamToString(is);
+		this.exception = exception;
 		try {
+			String jsonStr = streamToString(is);
 			if (jsonStr.charAt(0) == '[') {
-				json = new DroidHTTPJSON<JSONArray>(jsonStr, JSONArray.class);
+				json = new AsyncDroidHTTPJSON<JSONArray>(jsonStr, JSONArray.class);
 			} else {
-				json = new DroidHTTPJSON<JSONObject>(jsonStr, JSONObject.class);
+				json = new AsyncDroidHTTPJSON<JSONObject>(jsonStr, JSONObject.class);
 
 			}
-		} catch (JSONException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
+			this.exception = e;
 		}
 	}
 
@@ -60,4 +62,9 @@ public class DroidHTTPResponse {
 		return sb.toString();
 
 	}
+
+	public Exception getException() {
+		return exception;
+	}
+
 }

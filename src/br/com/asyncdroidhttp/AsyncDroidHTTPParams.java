@@ -1,6 +1,6 @@
-package br.com.droidhttp;
+package br.com.asyncdroidhttp;
 
-public class DroidHTTPParams {
+public class AsyncDroidHTTPParams {
 
 	
 	private int readTimeOut;
@@ -8,7 +8,7 @@ public class DroidHTTPParams {
 	private boolean usesCache;
 	private String contentType;
 	
-	public DroidHTTPParams(int readTimeOut, int connectTimeOut, boolean usesCache, String contentType){
+	public AsyncDroidHTTPParams(int readTimeOut, int connectTimeOut, boolean usesCache, String contentType){
 		this.readTimeOut = readTimeOut;
 		this.connectTimeOut = connectTimeOut;
 		this.usesCache = usesCache;

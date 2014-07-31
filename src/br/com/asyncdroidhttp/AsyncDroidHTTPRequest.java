@@ -1,9 +1,8 @@
-package br.com.droidhttp;
+package br.com.asyncdroidhttp;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -20,44 +19,24 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.Build;
-import android.util.Log;
 
-public class DroidHTTPRequest {
-	public String mainURL;
-	private DroidHTTPParams droidParams;
-
-	public DroidHTTPRequest(String mainURL, DroidHTTPParams droidParams) {
-		this.mainURL = mainURL;
-		this.droidParams = droidParams;
-	}
-
-	public DroidHTTPResponse put(JSONObject params) throws MalformedURLException, IOException {
-		return via(HTTPMethod.PUT, params, droidParams);
-	}
-
-	public DroidHTTPResponse delete(JSONObject params) throws MalformedURLException, IOException {
-		return via(HTTPMethod.DELETE, params, droidParams);
-	}
+public class AsyncDroidHTTPRequest {
 	
-	public DroidHTTPResponse delete() throws MalformedURLException, IOException {
-		return via(HTTPMethod.DELETE, null, droidParams);
+	private String url;
+
+	public AsyncDroidHTTPRequest(String url, AsyncDroidHTTPParams droidParams) {
+		this.url = url;
 	}
 
-	public DroidHTTPResponse post(JSONObject params) throws MalformedURLException, IOException {
-		return via(HTTPMethod.POST, params, droidParams);
-	}
+	
 
-	public DroidHTTPResponse get() throws MalformedURLException, IOException {
-		return via(HTTPMethod.GET, null, droidParams);
-	}
-
-	private HttpURLConnection connectFor(HTTPMethod httpMethod, JSONObject params, DroidHTTPParams droidParams) throws MalformedURLException, IOException {
-		URL url = new URL(getPathWithLocale(mainURL));
+	private HttpURLConnection connectFor(String httpMethod, JSONObject params, AsyncDroidHTTPParams droidParams) throws MalformedURLException, IOException {
 		if (android.os.Build.VERSION.SDK_INT == Build.VERSION_CODES.FROYO ) {
 			trustAllHosts();
 		}
+		URL url = new URL(this.url);
 		HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-		urlConnection.setRequestMethod(httpMethod.getValue());
+		urlConnection.setRequestMethod(httpMethod);
 
 		urlConnection.setUseCaches(droidParams != null? droidParams.isUsesCache():false);
 		urlConnection.setConnectTimeout(droidParams != null? droidParams.getConnectTimeOut():40000);
@@ -79,15 +58,6 @@ public class DroidHTTPRequest {
 		urlConnection.connect();
 
 		return urlConnection;
-	}
-	
-	private String getPathWithLocale(String path){
-		String locale = Locale.getDefault().getLanguage();
-		String append = path.contains("?")?"&":"?";
-		
-		StringBuilder sbr = new StringBuilder(path);
-		sbr.append(append).append("locale=").append(locale);
-		return sbr.toString();
 	}
 
 	/**
@@ -117,44 +87,31 @@ public class DroidHTTPRequest {
 		}
 	}
 
-	private DroidHTTPResponse via(HTTPMethod httpMethod, JSONObject params, DroidHTTPParams droidParams) throws IOException, UnsupportedEncodingException {
+	public AsyncDroidHTTPResponse via(String httpMethod, JSONObject params, AsyncDroidHTTPParams droidParams) {
 		int responseCode = -1;
 		HttpURLConnection urlConnection = null;
 		try {
 			urlConnection = connectFor(httpMethod, params, droidParams);
 			responseCode = urlConnection.getResponseCode();
 			if (urlConnection.getContent() != null) {
-				return new DroidHTTPResponse(responseCode, urlConnection.getInputStream());
+				return new AsyncDroidHTTPResponse(responseCode, urlConnection.getInputStream(), null);
 			} else {
-				return new DroidHTTPResponse(responseCode);
+				return new AsyncDroidHTTPResponse(responseCode);
 			}
 		} catch (FileNotFoundException e) {
-			return new DroidHTTPResponse(responseCode, urlConnection.getErrorStream());
+			return new AsyncDroidHTTPResponse(responseCode, urlConnection.getErrorStream(), e);
 		} catch (IOException e) {
 			if ((responseCode == 422  || responseCode == 424)&& urlConnection != null) {
-				return new DroidHTTPResponse(responseCode, urlConnection.getErrorStream());
+				return new AsyncDroidHTTPResponse(responseCode, urlConnection.getErrorStream(), e);
 			}
-
-			if (e.getMessage() != null && e.getMessage().contains("authentication challenge")) {
-				return new DroidHTTPResponse(HttpURLConnection.HTTP_UNAUTHORIZED);
-			} else {
-				throw e;
-			}
+			return new AsyncDroidHTTPResponse(HttpURLConnection.HTTP_UNAUTHORIZED);
+//			if (e.getMessage() != null && e.getMessage().contains("authentication challenge")) {
+//				return new DroidHTTPResponse(HttpURLConnection.HTTP_UNAUTHORIZED);
+//			} else {
+//				throw e;
+//			}
 		}
 	}
+
 }
 
-enum HTTPMethod {
-	GET("GET"), POST("POST"), PUT("PUT"), DELETE("DELETE");
-
-	private String value;
-
-	private HTTPMethod(String value) {
-		this.value = value;
-	}
-
-	public String getValue() {
-		return value;
-	}
-	
-}

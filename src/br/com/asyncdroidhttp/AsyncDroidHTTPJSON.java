@@ -1,14 +1,14 @@
-package br.com.droidhttp;
+package br.com.asyncdroidhttp;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 @SuppressWarnings("unchecked")
-public class DroidHTTPJSON<T> {
+public class AsyncDroidHTTPJSON<T> {
 	private T json;
 
-	public DroidHTTPJSON(String jsonStr, Class<T> jsonClass) throws JSONException {
+	public AsyncDroidHTTPJSON(String jsonStr, Class<T> jsonClass) throws JSONException {
 		if (jsonClass == JSONArray.class) {
 			json = (T) new JSONArray(jsonStr);
 		} else if (jsonClass == JSONObject.class) {
