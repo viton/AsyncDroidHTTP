@@ -41,7 +41,7 @@ public class AsyncDroidHTTP implements AsyncDroidHTTPMethods {
 	
 	public interface AsyncDroidHTTPCallback{
 		
-		public void httpSuccess(int httpResponseCode, Object object);
+		public void httpSuccess(int httpResponseCode, HALObject object);
 		
 		public void httpError(int httpResponseCode, Exception exception);
 		

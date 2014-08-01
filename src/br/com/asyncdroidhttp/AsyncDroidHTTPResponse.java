@@ -6,13 +6,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-@SuppressWarnings("rawtypes")
 public class AsyncDroidHTTPResponse {
 	private int responseCode;
-	private AsyncDroidHTTPJSON json;
+	private HALObject json;
 	private Exception exception;
 	
 	public AsyncDroidHTTPResponse(int responseCode) {
@@ -25,12 +21,7 @@ public class AsyncDroidHTTPResponse {
 		this.exception = exception;
 		try {
 			String jsonStr = streamToString(is);
-			if (jsonStr.charAt(0) == '[') {
-				json = new AsyncDroidHTTPJSON<JSONArray>(jsonStr, JSONArray.class);
-			} else {
-				json = new AsyncDroidHTTPJSON<JSONObject>(jsonStr, JSONObject.class);
-
-			}
+			json = new HALObject(jsonStr);
 		} catch (Exception e) {
 			e.printStackTrace();
 			this.exception = e;
@@ -41,8 +32,8 @@ public class AsyncDroidHTTPResponse {
 		return responseCode;
 	}
 
-	public Object getJson() {
-		return json.getJSON();
+	public HALObject getJson() {
+		return json;
 	}
 	
 	public boolean hasJson() {

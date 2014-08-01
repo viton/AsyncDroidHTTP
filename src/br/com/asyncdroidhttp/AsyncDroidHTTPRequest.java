@@ -105,11 +105,6 @@ public class AsyncDroidHTTPRequest {
 				return new AsyncDroidHTTPResponse(responseCode, urlConnection.getErrorStream(), e);
 			}
 			return new AsyncDroidHTTPResponse(HttpURLConnection.HTTP_UNAUTHORIZED);
-//			if (e.getMessage() != null && e.getMessage().contains("authentication challenge")) {
-//				return new DroidHTTPResponse(HttpURLConnection.HTTP_UNAUTHORIZED);
-//			} else {
-//				throw e;
-//			}
 		}
 	}
 

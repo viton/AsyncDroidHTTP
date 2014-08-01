@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <issue id="TrulyRandom">
+        <ignore path="src/br/com/asyncdroidhttp/AsyncDroidHTTPRequest.java" />
+    </issue>
+</lint>
